@@ -31,9 +31,9 @@ public class ReactiveNoteActivity extends Activity {
     private EditText editText;
     private View addNoteButton;
 
-    private Box<Note> notesBox;
-    private Query<Note> notesQuery;
-    private NotesAdapter notesAdapter;
+    private Box<Task> notesBox;
+    private Query<Task> notesQuery;
+    private TasksAdapter tasksAdapter;
     private DataSubscriptionList subscriptions = new DataSubscriptionList();
 
     @Override
@@ -43,17 +43,17 @@ public class ReactiveNoteActivity extends Activity {
 
         setUpViews();
 
-        notesBox = ((App) getApplication()).getBoxStore().boxFor(Note.class);
+        notesBox = ((App) getApplication()).getBoxStore().boxFor(Task.class);
 
-        // query all notes, sorted a-z by their text (http://greenrobot.org/objectbox/documentation/queries/)
-        notesQuery = notesBox.query().order(Note_.text).build();
+        // query all notes, sorted a-z by their title (http://greenrobot.org/objectbox/documentation/queries/)
+        notesQuery = notesBox.query().order(Task_.title).build();
 
         // Reactive query (http://greenrobot.org/objectbox/documentation/data-observers-reactive-extensions/)
         notesQuery.subscribe(subscriptions).on(AndroidScheduler.mainThread())
-                .observer(new DataObserver<List<Note>>() {
+                .observer(new DataObserver<List<Task>>() {
                     @Override
-                    public void onData(List<Note> notes) {
-                        notesAdapter.setNotes(notes);
+                    public void onData(List<Task> tasks) {
+                        tasksAdapter.setTasks(tasks);
                     }
                 });
     }
@@ -68,8 +68,8 @@ public class ReactiveNoteActivity extends Activity {
         ListView listView = (ListView) findViewById(R.id.listViewNotes);
         listView.setOnItemClickListener(noteClickListener);
 
-        notesAdapter = new NotesAdapter();
-        listView.setAdapter(notesAdapter);
+        tasksAdapter = new TasksAdapter();
+        listView.setAdapter(tasksAdapter);
 
         addNoteButton = findViewById(R.id.buttonAdd);
         addNoteButton.setEnabled(false);
@@ -115,20 +115,20 @@ public class ReactiveNoteActivity extends Activity {
         DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
         String comment = "Added on " + df.format(new Date());
 
-        Note note = new Note();
-        note.setText(noteText);
-        note.setComment(comment);
-        note.setDate(new Date());
-        notesBox.put(note);
-        Log.d(App.TAG, "Inserted new note, ID: " + note.getId());
+        Task task = new Task();
+        task.setTitle(noteText);
+        task.setComment(comment);
+        task.setDate(new Date());
+        notesBox.put(task);
+        Log.d(App.TAG, "Inserted new task, ID: " + task.getId());
     }
 
     OnItemClickListener noteClickListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Note note = notesAdapter.getItem(position);
-            notesBox.remove(note);
-            Log.d(App.TAG, "Deleted note, ID: " + note.getId());
+            Task task = tasksAdapter.getItem(position);
+            notesBox.remove(task);
+            Log.d(App.TAG, "Deleted task, ID: " + task.getId());
         }
     };
 }

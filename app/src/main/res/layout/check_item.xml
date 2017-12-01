@@ -7,17 +7,10 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/textViewNoteText"
+        android:id="@+id/textViewTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="14sp"
-        tools:title="Note Text" />
-
-    <TextView
-        android:id="@+id/textViewNoteComment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        tools:title="Note Comment" />
+        tools:title="CheckList Title" />
 
 </LinearLayout>

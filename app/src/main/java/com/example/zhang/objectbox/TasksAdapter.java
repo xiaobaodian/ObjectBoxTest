@@ -9,9 +9,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotesAdapter extends BaseAdapter {
+public class TasksAdapter extends BaseAdapter {
 
-    private List<Note> dataset;
+    private List<Task> dataset;
 
     private static class NoteViewHolder {
 
@@ -24,12 +24,12 @@ public class NotesAdapter extends BaseAdapter {
         }
     }
 
-    public NotesAdapter() {
+    public TasksAdapter() {
         this.dataset = new ArrayList<>();
     }
 
-    public void setNotes(List<Note> notes) {
-        dataset = notes;
+    public void setTasks(List<Task> tasks) {
+        dataset = tasks;
         notifyDataSetChanged();
     }
 
@@ -45,9 +45,9 @@ public class NotesAdapter extends BaseAdapter {
             holder = (NoteViewHolder) convertView.getTag();
         }
 
-        Note note = getItem(position);
-        holder.text.setText(note.getText());
-        holder.comment.setText(note.getComment());
+        Task task = getItem(position);
+        holder.text.setText(task.getTitle());
+        holder.comment.setText(task.getComment());
 
         return convertView;
     }
@@ -58,7 +58,7 @@ public class NotesAdapter extends BaseAdapter {
     }
 
     @Override
-    public Note getItem(int position) {
+    public Task getItem(int position) {
         return dataset.get(position);
     }
 

@@ -15,8 +15,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:hint="add"
         android:onClick="onAddButtonClick"
-        android:text="@string/add"/>
+        android:title="@string/add" />
 
     <EditText
         android:id="@+id/editTextNote"
@@ -24,8 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_toLeftOf="@id/buttonAdd"
         android:hint="@string/enter_new_note"
-        android:imeOptions="actionDone"
-        android:inputType="text"/>
+        android:imeOptions="actionDone"/>
 
     <TextView
         android:id="@+id/textViewNoteInstructions"
@@ -36,16 +36,34 @@
         android:paddingBottom="8dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
-        android:text="@string/click_to_remove"
-        android:textSize="12sp"/>
+        android:textSize="12sp"
+        android:title="@string/click_to_remove" />
 
-    <ListView
-        android:id="@+id/listViewNotes"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/textViewNoteInstructions"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="4dp"
-        android:scrollbars="vertical"/>
+        android:orientation="vertical">
+
+        <ListView
+            android:id="@+id/listViewNotes"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_alignParentBottom="false"
+            android:layout_below="@+id/textViewNoteInstructions"
+            android:layout_marginBottom="4dp"
+            android:background="?android:attr/colorControlActivated"
+            android:scrollbars="vertical" />
+
+        <ListView
+            android:id="@+id/listViewCheckList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="4dp"
+            android:background="@android:color/holo_blue_dark"
+            android:scrollbars="vertical" />
+
+    </LinearLayout>
 
 </RelativeLayout>

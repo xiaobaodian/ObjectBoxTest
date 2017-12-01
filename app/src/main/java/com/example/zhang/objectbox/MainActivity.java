@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -27,11 +26,15 @@ import io.objectbox.query.Query;
 public class MainActivity extends Activity {
 
     private EditText editText;
-    private View addNoteButton;
+    private View addTaskButton;
 
-    private Box<Note> notesBox;
-    private Query<Note> notesQuery;
-    private NotesAdapter notesAdapter;
+    private Box<Task> tasksBox;
+    private Query<Task> tasksQuery;
+    private TasksAdapter tasksAdapter;
+
+    private Box<CheckItem> checkItemsBox;
+    private Query<CheckItem> checkItemsQuery;
+    private CheckListAdapter checkListAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,28 +44,48 @@ public class MainActivity extends Activity {
         setUpViews();
 
         BoxStore boxStore = ((App) getApplication()).getBoxStore();
-        notesBox = boxStore.boxFor(Note.class);
 
-        // query all notes, sorted a-z by their text (http://greenrobot.org/objectbox/documentation/queries/)
-        notesQuery = notesBox.query().order(Note_.text).build();
-        updateNotes();
+        tasksBox = boxStore.boxFor(Task.class);
+        checkItemsBox = boxStore.boxFor(CheckItem.class);
+
+        // query all notes, sorted a-z by their title (http://greenrobot.org/objectbox/documentation/queries/)
+        tasksQuery = tasksBox.query().order(Task_.title).build();
+        checkItemsQuery = checkItemsBox.query().order(CheckItem_.title).build();
+        updateTasks();
     }
 
     /** Manual trigger to re-query and update the UI. For a reactive alternative check {@link ReactiveNoteActivity}. */
-    private void updateNotes() {
-        List<Note> notes = notesQuery.find();
-        notesAdapter.setNotes(notes);
+    private void updateTasks() {
+        List<Task> tasks = tasksQuery.find();
+        tasksAdapter.setTasks(tasks);
+    }
+    private void updatecheck(){
+        List<CheckItem> checkItems = checkItemsQuery.find();
+        checkListAdapter.setCheckList(checkItems);
+    }
+    private void updateCheckList(Task task){
+        List<CheckItem> checkList = task.checkList;
+        if (checkList != null){
+            checkListAdapter.setCheckList(checkList);
+        }
     }
 
+
     protected void setUpViews() {
-        ListView listView = findViewById(R.id.listViewNotes);
-        listView.setOnItemClickListener(noteClickListener);
+        ListView listViewTask = findViewById(R.id.listViewNotes);
+        listViewTask.setOnItemClickListener(noteClickListener);
 
-        notesAdapter = new NotesAdapter();
-        listView.setAdapter(notesAdapter);
+        tasksAdapter = new TasksAdapter();
+        listViewTask.setAdapter(tasksAdapter);
 
-        addNoteButton = findViewById(R.id.buttonAdd);
-        addNoteButton.setEnabled(false);
+        ListView listViewCheckList = findViewById(R.id.listViewCheckList);
+        listViewCheckList.setOnItemClickListener(checkClickListener);
+
+        checkListAdapter = new CheckListAdapter();
+        listViewCheckList.setAdapter(checkListAdapter);
+
+        addTaskButton = findViewById(R.id.buttonAdd);
+        addTaskButton.setEnabled(false);
 
         editText = findViewById(R.id.editTextNote);
         editText.setOnEditorActionListener(new OnEditorActionListener() {
@@ -70,7 +93,7 @@ public class MainActivity extends Activity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    addNote();
+                    addTask();
                     return true;
                 }
                 return false;
@@ -82,7 +105,7 @@ public class MainActivity extends Activity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 boolean enable = s.length() != 0;
-                addNoteButton.setEnabled(enable);
+                addTaskButton.setEnabled(enable);
             }
 
             @Override
@@ -97,33 +120,55 @@ public class MainActivity extends Activity {
     }
 
     public void onAddButtonClick(View view) {
-        addNote();
+        addTask();
     }
 
-    private void addNote() {
+    private void addTask() {
         String noteText = editText.getText().toString();
         editText.setText("");
 
         DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
         String comment = "Added on " + df.format(new Date());
 
-        Note note = new Note();
-        note.setText(noteText);
-        note.setComment(comment);
-        note.setDate(new Date());
-        notesBox.put(note);
-        Log.d(App.TAG, "Inserted new note, ID: " + note.getId());
+        Task task = new Task();
+        task.setTitle(noteText);
+        task.setComment(comment);
+        task.setDate(new Date());
+        CheckItem checkItem;
+        checkItem = new CheckItem();
+        checkItem.setTitle(noteText+"1");
+        task.checkList.add(checkItem);
+        checkItem = new CheckItem();
+        checkItem.setTitle(noteText+"2");
+        task.checkList.add(checkItem);
+        checkItem = new CheckItem();
+        checkItem.setTitle(noteText+"3");
+        task.checkList.add(checkItem);
+        long taskid = tasksBox.put(task);
+        Log.d(App.TAG, "Inserted new task, ID: " + task.getId());
 
-        updateNotes();
+        updateTasks();
     }
 
     OnItemClickListener noteClickListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Note note = notesAdapter.getItem(position);
-            notesBox.remove(note);
-            Log.d(App.TAG, "Deleted note, ID: " + note.getId());
-            updateNotes();
+            Task task = tasksAdapter.getItem(position);
+            //tasksBox.remove(task);
+            //Log.d(App.TAG, "Deleted task, ID: " + task.getId());
+            //updateTasks();
+            updateCheckList(task);
+        }
+    };
+
+    OnItemClickListener checkClickListener = new OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            CheckItem item = checkListAdapter.getItem(position);
+            Task t = null;
+            Task task = item.task.getTarget();
+            long oid = item.task.getTargetId();
+            editText.setText(task.getTitle());
         }
     };
 
